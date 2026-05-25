@@ -1,0 +1,39 @@
+.layout[b-7pwuwze2be] {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar[b-7pwuwze2be] {
+    width: 220px;
+    background-color: #2f4f6f; /* støvet blå */
+    color: white;
+    padding: 20px;
+}
+
+.menu-item[b-7pwuwze2be] {
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+/* Main */
+.main[b-7pwuwze2be] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Topbar */
+.topbar[b-7pwuwze2be] {
+    height: 60px;
+    background-color: #4a6f91; /* lysere støvet blå */
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+/* Content */
+.content[b-7pwuwze2be] {
+    padding: 20px;
+}

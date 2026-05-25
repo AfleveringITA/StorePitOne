@@ -1,0 +1,198 @@
+/* _content/StorePitOne/Pages/Index.razor.rz.scp.css */
+.login-page[b-xwexexu81a] {
+    display: flex;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.login-left[b-xwexexu81a] {
+    width: 48%;
+    background: #f7f7f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.login-box[b-xwexexu81a] {
+    width: 100%;
+    max-width: 520px;
+}
+
+.login-box h1[b-xwexexu81a] {
+    font-size: 44px;
+    margin-bottom: 30px;
+    color: #1f2d3d;
+}
+
+.form-group[b-xwexexu81a] {
+    margin-bottom: 22px;
+}
+
+.form-group label[b-xwexexu81a] {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #3c4a57;
+}
+
+.form-group input[b-xwexexu81a] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    border: 1px solid #c7d0d8;
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.login-button[b-xwexexu81a] {
+    width: 100%;
+    margin-top: 10px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    background-color: #5f7d95;
+    color: white;
+}
+
+.login-button:hover[b-xwexexu81a] {
+    background-color: #4f6d85;
+}
+
+.login-message[b-xwexexu81a] {
+    margin-top: 20px;
+    color: #2f4f6f;
+    font-weight: 600;
+}
+
+.login-right[b-xwexexu81a] {
+    width: 52%;
+    background: linear-gradient(rgba(70, 100, 130, 0.95), rgba(70, 100, 130, 0.95));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.brand-box[b-xwexexu81a] {
+    text-align: center;
+    color: white;
+}
+
+.brand-title[b-xwexexu81a] {
+    font-size: 88px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.brand-subtitle[b-xwexexu81a] {
+    margin-top: 18px;
+    font-size: 28px;
+    font-weight: 500;
+}
+/* _content/StorePitOne/Shared/MainLayout.razor.rz.scp.css */
+.layout[b-7pwuwze2be] {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar[b-7pwuwze2be] {
+    width: 220px;
+    background-color: #2f4f6f; /* støvet blå */
+    color: white;
+    padding: 20px;
+}
+
+.menu-item[b-7pwuwze2be] {
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+/* Main */
+.main[b-7pwuwze2be] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Topbar */
+.topbar[b-7pwuwze2be] {
+    height: 60px;
+    background-color: #4a6f91; /* lysere støvet blå */
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+/* Content */
+.content[b-7pwuwze2be] {
+    padding: 20px;
+}
+/* _content/StorePitOne/Shared/NavMenu.razor.rz.scp.css */
+.navbar-toggler[b-wpyzee0bsq] {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.top-row[b-wpyzee0bsq] {
+    height: 3.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.navbar-brand[b-wpyzee0bsq] {
+    font-size: 1.1rem;
+}
+
+.oi[b-wpyzee0bsq] {
+    width: 2rem;
+    font-size: 1.1rem;
+    vertical-align: text-top;
+    top: -2px;
+}
+
+.nav-item[b-wpyzee0bsq] {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+}
+
+    .nav-item:first-of-type[b-wpyzee0bsq] {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type[b-wpyzee0bsq] {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item[b-wpyzee0bsq]  a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
+
+.nav-item[b-wpyzee0bsq]  a.active {
+    background-color: rgba(255,255,255,0.25);
+    color: white;
+}
+
+.nav-item[b-wpyzee0bsq]  a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+@media (min-width: 641px) {
+    .navbar-toggler[b-wpyzee0bsq] {
+        display: none;
+    }
+
+    .collapse[b-wpyzee0bsq] {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+}
