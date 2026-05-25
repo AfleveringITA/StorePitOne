@@ -1,0 +1,184 @@
+@page "/admin-customers"
+
+@inject SqlService SqlService
+@inject StorePitOne.Services.UserService UserService
+@inject NavigationManager Nav
+
+<PageTitle>Admin Customers</PageTitle>
+
+@if (!_isAdmin)
+{
+    <p>Du har ikke adgang til denne side.</p>
+}
+else
+{
+    <h3>Admin Customers</h3>
+
+    <div class="card p-3 mb-4">
+        <h5>Opret ny kunde</h5>
+
+        <div class="mb-3">
+            <label class="form-label">Kundenavn</label>
+            <input class="form-control" @bind="_name" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Peak API Key</label>
+            <input class="form-control" @bind="_apiKey" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="CreateCustomer">
+            Opret kunde
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="alert alert-info">
+            @_message
+        </div>
+    }
+
+    <div class="card p-3">
+        <h5>Eksisterende kunder</h5>
+
+        <button class="btn btn-secondary mb-3" @onclick="LoadCustomers">
+            Opdater kundeliste
+        </button>
+
+        @if (_customers.Count == 0)
+        {
+            <p>Ingen kunder hentet endnu.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Navn</th>
+                        <th>Aktiv</th>
+                        <th>API key</th>
+                        <th>Handling</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in _customers)
+                    {
+                        <tr>
+                            <td>@customer.Id</td>
+                            <td>@customer.Name</td>
+                            <td>@customer.IsActive</td>
+                            <td>@customer.ApiKeyPreview</td>
+                            <td>
+                                @if (customer.IsActive)
+                                {
+                                    <button class="btn btn-sm btn-danger"
+                                            @onclick="() => DeactivateCustomer(customer.Id)">
+                                        Deaktiver
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-success"
+                                            @onclick="() => ReactivateCustomer(customer.Id)">
+                                        Reaktiver
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
+
+@code {
+    private bool _isAdmin;
+
+    private string _name = "";
+    private string _apiKey = "";
+    private string? _message;
+
+    private List<SqlService.CustomerAdminViewModel> _customers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAdmin = UserService.CurrentUser?.Role == "Admin";
+
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        _customers = await SqlService.GetCustomersForAdmin();
+    }
+
+    private async Task CreateCustomer()
+    {
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_name))
+        {
+            _message = "Kundenavn mangler.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            _message = "API key mangler.";
+            return;
+        }
+
+        await SqlService.CreateCustomer(_name.Trim(), _apiKey.Trim());
+
+        _message = "Kunde oprettet.";
+
+        _name = "";
+        _apiKey = "";
+
+        await LoadCustomers();
+    }
+
+    private async Task DeactivateCustomer(int customerId)
+    {
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        await SqlService.DeactivateCustomer(customerId);
+
+        _message = $"Kunde {customerId} blev deaktiveret.";
+
+        await LoadCustomers();
+    }
+
+    private async Task ReactivateCustomer(int customerId)
+    {
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        await SqlService.ReactivateCustomer(customerId);
+
+        _message = $"Kunde {customerId} blev reaktiveret.";
+
+        await LoadCustomers();
+    }
+}

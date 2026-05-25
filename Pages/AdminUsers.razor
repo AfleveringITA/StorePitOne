@@ -1,0 +1,149 @@
+@page "/admin-users"
+
+@inject SqlService SqlService
+@inject StorePitOne.Services.UserService UserService
+
+<PageTitle>Admin Users</PageTitle>
+
+@if (UserService.CurrentUser?.Role != "Admin")
+{
+    <p>Du har ikke adgang til denne side.</p>
+}
+else
+{
+    <h3>Admin Users</h3>
+
+    <div class="card p-3 mb-4">
+
+        <h5>Opret bruger</h5>
+
+        <div class="mb-3">
+            <label class="form-label">E-mail</label>
+            <input class="form-control" @bind="_email" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Kodeord (6 tegn)</label>
+            <input class="form-control" @bind="_password" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Rolle</label>
+
+            <select class="form-select" @bind="_role">
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" @onclick="CreateUser">
+            Opret bruger
+        </button>
+
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="alert alert-info">
+            @_message
+        </div>
+    }
+
+    <div class="card p-3">
+
+        <h5>Brugere</h5>
+
+        <button class="btn btn-secondary mb-3" @onclick="LoadUsers">
+            Opdater brugere
+        </button>
+
+        <table class="table table-striped">
+
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var user in _users)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td>@user.CreatedAt</td>
+
+                        <td>
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => DeleteUser(user.Id)">
+                                Slet
+                            </button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+}
+
+@code {
+
+    private string _email = "";
+    private string _password = "";
+    private string _role = "User";
+
+    private string? _message;
+
+    private List<SqlService.UserAdminViewModel> _users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _users = await SqlService.GetUsersForAdmin();
+    }
+
+    private async Task CreateUser()
+    {
+        try
+        {
+            await SqlService.CreateUser(
+                _email.Trim(),
+                _password.Trim(),
+                _role);
+
+            _message = "Bruger oprettet.";
+
+            _email = "";
+            _password = "";
+            _role = "User";
+
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+        }
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        await SqlService.DeleteUser(userId);
+
+        _message = "Bruger slettet.";
+
+        await LoadUsers();
+    }
+}

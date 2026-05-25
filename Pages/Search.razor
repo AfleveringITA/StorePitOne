@@ -1,0 +1,206 @@
+@page "/stock-actions"
+
+@using StorePitOne.Services
+@inject StockAnalyticsService StockAnalyticsService
+
+<PageTitle>Vareopslag</PageTitle>
+
+<h3>Vareopslag</h3>
+
+<div class="card p-3 mb-4">
+    <h5>Søg varehistorik</h5>
+
+    <div class="mb-3">
+        <label class="form-label">Varenummer</label>
+        <input class="form-control"
+               @bind="_itemNumber"
+               placeholder="Skriv varenummer" />
+    </div>
+
+    <button class="btn btn-primary" @onclick="SearchItem">
+        Søg
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div class="alert alert-info">
+        @_message
+    </div>
+}
+
+@if (_isLoading)
+{
+    <p>Henter varehistorik...</p>
+}
+
+@if (_history.Count > 0)
+{
+    <div class="card p-3 mb-4">
+        <h5>Opsummering</h5>
+
+        <p><strong>Varenummer:</strong> @_itemNumber</p>
+        <p><strong>Total hændelser:</strong> @_totalEvents</p>
+        <p><strong>Side:</strong> @_pageNumber af @_totalPages</p>
+        <p><strong>Hændelser på denne side:</strong> @_history.Count</p>
+        <p><strong>Første bevægelse på siden:</strong> @_firstMovement</p>
+        <p><strong>Seneste bevægelse på siden:</strong> @_lastMovement</p>
+        <p><strong>Dage mellem første og seneste på siden:</strong> @_daysInFlow</p>
+
+        <button class="btn btn-secondary me-2"
+                @onclick="PreviousPage"
+                disabled="@(_pageNumber <= 1)">
+            Forrige 500
+        </button>
+
+        <button class="btn btn-secondary"
+                @onclick="NextPage"
+                disabled="@(_pageNumber >= _totalPages)">
+            Næste 500
+        </button>
+    </div>
+
+    <div class="card p-3">
+        <h5>Varehistorik</h5>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tidspunkt</th>
+                    <th>Kunde</th>
+                    <th>Varenummer</th>
+                    <th>Handling</th>
+                    <th>Antal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in _history)
+                {
+                    <tr>
+                        <td>@item.CreatedAt?.ToString("dd-MM-yyyy HH:mm")</td>
+                        <td>@item.CustomerName</td>
+                        <td>@item.ItemNumber</td>
+                        <td>@item.ActionType - @GetActionText(item.ActionType)</td>
+                        <td>@item.Quantity</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private string _itemNumber = "";
+    private string? _message;
+    private bool _isLoading;
+
+    private int _pageNumber = 1;
+    private readonly int _pageSize = 500;
+
+    private int _totalEvents;
+    private int _totalPages;
+
+    private List<StockAnalyticsService.ItemHistoryEvent> _history = new();
+
+    private DateTime? _firstMovement;
+    private DateTime? _lastMovement;
+    private int _daysInFlow;
+
+    private async Task SearchItem()
+    {
+        _pageNumber = 1;
+        await LoadHistory();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_pageNumber <= 1)
+        {
+            return;
+        }
+
+        _pageNumber--;
+        await LoadHistory();
+    }
+
+    private async Task NextPage()
+    {
+        if (_pageNumber >= _totalPages)
+        {
+            return;
+        }
+
+        _pageNumber++;
+        await LoadHistory();
+    }
+
+    private async Task LoadHistory()
+    {
+        if (string.IsNullOrWhiteSpace(_itemNumber))
+        {
+            _message = "Skriv et varenummer først.";
+            return;
+        }
+
+        _message = null;
+        _isLoading = true;
+        _history.Clear();
+
+        try
+        {
+            _totalEvents = await StockAnalyticsService.GetItemHistoryCount(_itemNumber);
+
+            _totalPages = _totalEvents == 0
+                ? 0
+                : (int)Math.Ceiling((double)_totalEvents / _pageSize);
+
+            _history = await StockAnalyticsService.GetItemHistory(
+                _itemNumber,
+                _pageNumber,
+                _pageSize
+            );
+
+            if (_history.Count == 0)
+            {
+                _message = "Ingen historik fundet for denne side.";
+                return;
+            }
+
+            _firstMovement = _history
+                .Where(x => x.CreatedAt != null)
+                .Min(x => x.CreatedAt);
+
+            _lastMovement = _history
+                .Where(x => x.CreatedAt != null)
+                .Max(x => x.CreatedAt);
+
+            if (_firstMovement != null && _lastMovement != null)
+            {
+                _daysInFlow = (int)(_lastMovement.Value - _firstMovement.Value).TotalDays;
+            }
+
+            _message = "Varehistorik hentet.";
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetActionText(string? actionType)
+    {
+        return actionType switch
+        {
+            "200" => "Reservation",
+            "300" => "Udgående",
+            "400" => "Indgående",
+            "500" => "Flytning",
+            "600" => "Justering",
+            _ => actionType ?? ""
+        };
+    }
+}

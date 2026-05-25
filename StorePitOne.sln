@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorePitOne", "StorePitOne.csproj", "{89D6485C-57C9-9AED-E32C-FB97105285AE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89D6485C-57C9-9AED-E32C-FB97105285AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89D6485C-57C9-9AED-E32C-FB97105285AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89D6485C-57C9-9AED-E32C-FB97105285AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89D6485C-57C9-9AED-E32C-FB97105285AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D5729769-F38C-40C7-9343-74A53068D0D7}
+	EndGlobalSection
+EndGlobal

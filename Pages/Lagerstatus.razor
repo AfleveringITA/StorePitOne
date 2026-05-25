@@ -1,0 +1,119 @@
+@page "/lagerstatus"
+
+@using StorePitOne.Services
+@inject StockAnalyticsService StockAnalyticsService
+
+<PageTitle>Lagerstatus</PageTitle>
+
+<h3>Lagerstatus</h3>
+
+<div class="card p-3 mb-4">
+    <h5>Søg vare</h5>
+
+    <div class="mb-3">
+        <label class="form-label">Varenummer</label>
+        <input class="form-control"
+               @bind="_itemNumber"
+               placeholder="Skriv varenummer" />
+    </div>
+
+    <button class="btn btn-primary" @onclick="LoadStockStatus">
+        Hent lagerstatus
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div class="alert alert-info">
+        @_message
+    </div>
+}
+
+@if (_stockStatus != null)
+{
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card p-3">
+                <h6>Kunde</h6>
+                <h4>@_stockStatus.CustomerName</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3">
+                <h6>Varenummer</h6>
+                <h4>@_stockStatus.ItemNumber</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3">
+                <h6>Sidste indgående</h6>
+                <h4>@_stockStatus.LastInboundAt?.ToString("dd-MM-yyyy")</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3">
+                <h6>Indgående antal</h6>
+                <h4>@_stockStatus.LastInboundQuantity.ToString("N0")</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3">
+                <h6>Liggetid</h6>
+                <h4>@_stockStatus.DaysSinceLastInbound dage</h4>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+    <div class="card p-3">
+        <h6>På lager nu</h6>
+        <h4>@_stockStatus.QuantityOnStock.ToString("N0")</h4>
+    </div>
+</div>
+
+<div class="col-md-3 mb-3">
+    <div class="card p-3">
+        <h6>Udgående siden sidste indgang</h6>
+        <h4>@_stockStatus.OutboundSinceLastInbound.ToString("N0")</h4>
+    </div>
+</div>
+
+<div class="col-md-3 mb-3">
+    <div class="card p-3">
+        <h6>Dead stock risiko</h6>
+        <h4>@_stockStatus.DeadStockRisk</h4>
+        <small class="text-muted">
+    0-30 dage = AKTIV<br />
+    31-90 dage = LANGSOM<br />
+    90+ dage = DØD
+</small>
+    </div>
+</div>
+    </div>
+}
+
+@code {
+    private string _itemNumber = "";
+    private string? _message;
+
+    private StockAnalyticsService.StockStatusItem? _stockStatus;
+
+    private async Task LoadStockStatus()
+    {
+        if (string.IsNullOrWhiteSpace(_itemNumber))
+        {
+            _message = "Skriv et varenummer først.";
+            return;
+        }
+
+        _message = null;
+        _stockStatus = await StockAnalyticsService.GetStockStatusForItem(_itemNumber);
+
+        if (_stockStatus == null)
+        {
+            _message = "Ingen lagerstatus fundet for varenummeret.";
+        }
+    }
+}

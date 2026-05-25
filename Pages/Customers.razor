@@ -1,0 +1,40 @@
+@page "/customers"
+@inject StorePitOne.Services.CustomerService CustomerService
+@inject StorePitOne.Services.UserService UserService
+@inject NavigationManager Nav
+
+<h1>Kunder</h1>
+
+<input @bind="newCustomer.CompanyName" placeholder="Firmanavn" />
+<input @bind="newCustomer.PeakWmsApiKey" placeholder="API Key" />
+
+<button @onclick="AddCustomer">Tilføj kunde</button>
+
+<ul>
+    @foreach (var c in customers)
+    {
+        <li>@c.CompanyName - @c.PeakWmsApiKey</li>
+    }
+</ul>
+
+@code {
+    private List<StorePitOne.Models.Customer> customers = new();
+    private StorePitOne.Models.Customer newCustomer = new();
+
+   protected override void OnInitialized()
+{
+    if (UserService.CurrentUser?.Role != "Admin")
+    {
+        Nav.NavigateTo("/");
+        return;
+    }
+
+    customers = CustomerService.GetAll();
+}
+
+    private void AddCustomer()
+    {
+        CustomerService.Add(newCustomer);
+        newCustomer = new StorePitOne.Models.Customer();
+    }
+}

@@ -1,0 +1,69 @@
+@page "/products"
+@using StorePitOne.Models
+@using StorePitOne.Services
+@inject PeakWmsApiClient PeakWmsApiClient
+
+<h1>Produkter</h1>
+
+<button @onclick="LoadProducts">Hent produkter</button>
+
+@if (isLoading)
+{
+    <p>Henter...</p>
+}
+
+<p>Antal produkter: @products.Count</p>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <p style="color:red;">@errorMessage</p>
+}
+
+@if (products.Count > 0)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ItemNumber</th>
+                <th>Beskrivelse</th>
+                <th>ProductId</th>
+                <th>VariantId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td>@p.ItemNumber</td>
+                    <td>@p.Description</td>
+                    <td>@p.ProductId</td>
+                    <td>@p.VariantId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PeakProductDto> products = new();
+    private bool isLoading = false;
+    private string errorMessage = "";
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = "";
+            products = await PeakWmsApiClient.GetProductsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

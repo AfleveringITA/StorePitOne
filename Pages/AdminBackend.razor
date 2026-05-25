@@ -1,0 +1,197 @@
+@page "/admin-backend"
+
+@using Microsoft.AspNetCore.Components
+@using global::StorePitOne.Services
+
+@inject NavigationManager Nav
+@inject global::StorePitOne.Services.BackendStatusService BackendStatusService
+@inject global::StorePitOne.Services.BackendSmokeTestService BackendSmokeTestService
+@inject global::StorePitOne.Services.StockActionExtractionService StockActionExtractionService
+@inject global::StorePitOne.Services.PeakSyncOrchestratorService PeakSyncOrchestratorService
+@inject global::StorePitOne.Services.UserService UserService
+@inject global::StorePitOne.Services.SystemSettingsService SystemSettingsService
+
+<PageTitle>Admin Backend</PageTitle>
+
+@if (!_isReady)
+{
+    <p>Sender til login...</p>
+}
+else
+{
+    <h3>Admin Backend</h3>
+
+    <br />
+
+    <button class="btn btn-primary" @onclick="LoadStatus">
+        Hent Backend Status
+    </button>
+
+    <button class="btn btn-warning ms-2" @onclick="RunSmokeTest">
+        Kør Smoke Test
+    </button>
+
+    <button class="btn btn-danger ms-2" @onclick="RunExtraction">
+        Kør Extraction
+    </button>
+
+    <button class="btn btn-success ms-2" @onclick="UpdateWholeDatabase">
+        Opdater hele databasen
+    </button>
+
+    <br />
+    <br />
+
+    <div class="card p-3 mb-4">
+        <h5>Natlig opdatering</h5>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="nightlyEnabled"
+                   @bind="_nightlyEnabled" />
+
+            <label class="form-check-label" for="nightlyEnabled">
+                Natlig opdatering aktiv
+            </label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Kørselstidspunkt</label>
+
+            <select class="form-select" @bind="_nightlyTime">
+                @for (var hour = 0; hour < 24; hour++)
+                {
+                    <option value="@($"{hour:00}:00")">@($"{hour:00}:00")</option>
+                    <option value="@($"{hour:00}:15")">@($"{hour:00}:15")</option>
+                    <option value="@($"{hour:00}:30")">@($"{hour:00}:30")</option>
+                    <option value="@($"{hour:00}:45")">@($"{hour:00}:45")</option>
+                }
+            </select>
+        </div>
+
+        <p>
+            <strong>Sidste natlige kørsel:</strong>
+            @_lastNightlyRunText
+        </p>
+
+        <button class="btn btn-outline-primary" @onclick="SaveNightlySettings">
+            Gem natlig indstilling
+        </button>
+    </div>
+
+    @if (_status != null)
+    {
+        <div class="card p-3">
+            <h5>Backend Status</h5>
+
+            <p>
+                <strong>Database Online:</strong>
+                @_status.DatabaseOnline
+            </p>
+
+            <p>
+                <strong>PeakRawData Rows:</strong>
+                @_status.PeakRawDataCount
+            </p>
+
+            <p>
+                <strong>StockActionEvents Rows:</strong>
+                @_status.StockActionEventsCount
+            </p>
+
+            <p>
+                <strong>Seneste Raw Sync:</strong>
+                @_status.LatestRawSyncAt
+            </p>
+
+            <p>
+                <strong>Seneste Event Import:</strong>
+                @_status.LatestEventImportedAt
+            </p>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <br />
+
+        <div class="alert alert-info">
+            @_message
+        </div>
+    }
+}
+
+@code {
+    private global::StorePitOne.Services.BackendStatusService.BackendStatus? _status;
+    private string? _message;
+    private bool _isReady = false;
+
+    private bool _nightlyEnabled;
+    private string _nightlyTime = "02:00";
+    private string _lastNightlyRunText = "Aldrig";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserService.CurrentUser?.Role != "Admin")
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _isReady = true;
+
+        await LoadNightlySettings();
+    }
+
+    private async Task LoadNightlySettings()
+    {
+        var settings = await SystemSettingsService.GetSettings();
+
+        _nightlyEnabled = settings.NightlyUpdateEnabled;
+        _nightlyTime = settings.NightlyUpdateTime.ToString(@"hh\:mm");
+
+        _lastNightlyRunText = settings.LastNightlyRunAt == null
+            ? "Aldrig"
+            : settings.LastNightlyRunAt.Value.ToString("dd-MM-yyyy HH:mm:ss");
+    }
+
+    private async Task SaveNightlySettings()
+    {
+        await SystemSettingsService.UpdateNightlySettings(
+            _nightlyEnabled,
+            TimeSpan.Parse(_nightlyTime));
+
+        await LoadNightlySettings();
+
+        _message = "Natlig opdatering er gemt.";
+    }
+
+    private async Task LoadStatus()
+    {
+        _message = "Henter backend status...";
+        _status = await BackendStatusService.GetStatus();
+        _message = "Backend status hentet.";
+    }
+
+    private async Task RunSmokeTest()
+    {
+        _message = "Kører smoke test...";
+        await BackendSmokeTestService.RunSmokeTest();
+        _message = "Smoke test færdig. Se Azure Log Stream.";
+    }
+
+    private async Task RunExtraction()
+    {
+        _message = "Kører extraction...";
+        await StockActionExtractionService.ExtractStockActionsFromRawData();
+        _message = "Extraction færdig.";
+    }
+
+    private async Task UpdateWholeDatabase()
+    {
+        _message = "Opdaterer hele databasen...";
+        await PeakSyncOrchestratorService.UpdateWholeDatabase();
+        _message = "Hele databasen er opdateret.";
+    }
+}

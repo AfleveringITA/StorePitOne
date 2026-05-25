@@ -1,0 +1,91 @@
+@page "/login"
+@layout EmptyLayout
+@using Microsoft.AspNetCore.Components.Web
+@using StorePitOne.Services
+@inject SqlService SqlService
+@inject NavigationManager Nav
+@inject UserService UserService
+
+<div class="login-page">
+    <div class="login-left">
+        <div class="login-box">
+            <h1>Log ind</h1>
+
+            <div class="form-group">
+                <label>E-mail</label>
+                <input @bind="email" @onkeydown="HandleKey" />
+            </div>
+
+            <div class="form-group">
+                <label>Kodeord</label>
+                <input @bind="password" type="password" @bind:event="oninput" @onkeydown="HandleKey" />
+            </div>
+
+            <button class="login-button" @onclick="DoLogin">
+                LOG IND
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <p>@errorMessage</p>
+            }
+        </div>
+    </div>
+
+    <div class="login-right">
+        <div class="brand-box">
+            <div class="brand-title">StorePitOne</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SqlService.TestConnection();
+    }
+
+    private async Task DoLogin()
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            errorMessage = "E-mail skal udfyldes";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Kodeord skal udfyldes";
+            return;
+        }
+
+        var success = await UserService.LoginAsync(email, password);
+
+        if (!success)
+        {
+            errorMessage = "Forkert login";
+            return;
+        }
+
+        if (UserService.CurrentUser?.Role == "Admin")
+        {
+            Nav.NavigateTo("/admin-backend");
+        }
+        else
+        {
+            Nav.NavigateTo("/lagerstatus");
+        }
+    }
+
+    private async Task HandleKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await DoLogin();
+        }
+    }
+}

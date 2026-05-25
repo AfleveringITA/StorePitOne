@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+@inject StorePitOne.Services.UserService UserService
+@inject NavigationManager Nav
+
+<div>
+    <div style="width:220px; float:left; background:#2f4f6f; color:white; height:100vh; padding:20px;">
+
+        <h2>StorePitOne</h2>
+
+        @if (UserService.CurrentUser?.Role == "Admin")
+        {
+            <div style="margin-bottom:10px;">
+                <a href="/admin-backend"
+                   style="color:white; text-decoration:none; font-size:16px;">
+                    Admin Backend
+                </a>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <a href="/admin-customers"
+                   style="color:white; text-decoration:none; font-size:16px;">
+                    Admin Customers
+                </a>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <a href="/admin-users"
+                   style="color:white; text-decoration:none; font-size:16px;">
+                    Admin Users
+                </a>
+            </div>
+        }
+
+        <div style="margin-bottom:10px;">
+            <a href="/stock-actions"
+               style="color:white; text-decoration:none; font-size:16px;">
+                Vareopslag
+            </a>
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <a href="/lagerstatus"
+               style="color:white; text-decoration:none; font-size:16px;">
+                Lagerstatus
+            </a>
+        </div>
+
+        <div style="margin-top:30px;">
+            <button class="btn btn-sm btn-light" @onclick="Logout">
+                Log ud
+            </button>
+        </div>
+
+    </div>
+
+    <div style="margin-left:220px;">
+
+        <div style="height:60px; background:#4a6f91; color:white; padding:15px;">
+            StorePit System
+        </div>
+
+        <div style="padding:20px;">
+            @Body
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private void Logout()
+    {
+        UserService.Logout();
+        Nav.NavigateTo("/");
+    }
+}

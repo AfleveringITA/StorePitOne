@@ -1,0 +1,39 @@
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background-color: #2f4f6f; /* støvet blå */
+    color: white;
+    padding: 20px;
+}
+
+.menu-item {
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Topbar */
+.topbar {
+    height: 60px;
+    background-color: #4a6f91; /* lysere støvet blå */
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+/* Content */
+.content {
+    padding: 20px;
+}
